@@ -1,0 +1,72 @@
+# Redirect https to http for dev environment.
+server {
+  listen 443 ssl;
+  server_name    api.fansided.dev;
+  ssl_certificate       /etc/nginx/ssl/nginx.crt;
+  ssl_certificate_key   /etc/nginx/ssl/nginx.key;
+  return         301 http://$server_name$request_uri;
+}
+
+server {
+    listen 80;
+
+    server_name           api.fansided.dev;
+    client_max_body_size 20m;
+
+    root /var/www/api.fansided.com/htdocs/;
+
+    index index.php index.html
+
+    access_log            /var/log/nginx/api.fansided.dev.access.log debug;
+    error_log             /var/log/nginx/api.fansided.dev.error.log;
+
+    rewrite ^/V1/(.*) http://api.fansided.dev/v1/$1 permanent;
+    rewrite ^/V2/(.*) http://api.fansided.dev/v2/$1 permanent;
+
+    # Rewrite images to s3 path /thumbnails/ needs to be present
+    location /assets/images {
+        rewrite ^/assets/images/(.*)$ https://s3.amazonaws.com/api.fansided.com-partner-images/$1 redirect;
+    }
+
+    # Handle static files for v1/v2 and break at end to avoid recursive redirect.
+    location ~v(\d*)/((.*)\.(?:css|cur|js|jpg|jpeg|gif|htc|ico|png|html|xml))$ {
+        rewrite v(\d*)/((.*)\.(?:css|cur|js|jpg|jpeg|gif|htc|ico|png|html|xml))$ /v$1/public/$2 break;
+    }
+
+    # Handle static files for newsletter app break at end to avoid recursive redirect.
+    location ~newsletter-app/((.*)\.(?:css|cur|js|jpg|jpeg|gif|htc|ico|png|html|xml))$ {
+        rewrite newsletter-app/((.*)\.(?:css|cur|js|jpg|jpeg|gif|htc|ico|png|html|xml))$ /newsletter_app/public/$1 break;
+    }
+
+    location /v1 {
+        rewrite ^/v1/(.*)$ /v1/index.php last;
+    }
+
+    location /v2 {
+        rewrite ^/v2/?(.*)$ /v2/public/index.php last;
+    }
+
+    location /newsletter-app {
+        rewrite ^/newsletter-app/(.*)$ /newsletter_app/public/index.php last;
+    }
+
+    location / {
+        rewrite ^/v2/(.*)$ /$1 last;
+    }
+
+
+    location /payment {
+        rewrite ^/payment/(.*)$ /payment/public/ last;
+    }
+
+    location ~ \.php {
+        try_files $uri =404;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
+        fastcgi_index index.php;
+        fastcgi_pass unix:/var/run/php5-fpm.sock;
+    }
+
+}

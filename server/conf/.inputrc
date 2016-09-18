@@ -1,0 +1,6 @@
+# yum.
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+
+"\eOd": backward-word
+"\eOc": forward-word
