@@ -23,31 +23,23 @@ include_once('server_config.php');
         </div>
     </div>
 		</div>
-		<p>Welcome to the new age of streaming media.</p>
-		<a href="http://plex.tv">
-			<button type="button" class="btn btn-default btn-upsize" aria-label="Left Align">
-			<span class="glyphicon glyphicon-facetime-video" aria-hidden="true"></span>
-			Plex Media Player
-			</button>
-		</a>
-		<a href="http://server.sethflix.com:3000/">
-			<button type="button" class="btn btn-default btn-upsize" aria-label="Left Align">
-			<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-			Plex Requests
-			</button>
-		</a>
-		<a href="http://status.sethflix.com/">
-			<button type="button" class="btn btn-default btn-upsize" aria-label="Left Align">
-			<span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
-			Sethflix Status
-			</button>
-		</a>
-		<a href="http://sethflix.com/friends.php">
-			<button type="button" class="btn btn-default btn-upsize" aria-label="Left Align">
-				<span class="glyphicon glyphicon-user" aria-hidden="true"></span>
-				Sethflix Friends
-			</button>
-		</a>
+		<p>Say hello to your fellow SethFlixers.</p>
+		<ul style="font-size: 1.4em; line-height: 24px; list-style: none;">
+			<?php
+			$friends = Plex_API_SDK_Redux::get_friends();
+
+			foreach ($friends as $username => $data){
+				$dat = print_r($data, true);
+				$av = $data['thumb'];
+				$extra  = '';
+				if( ! empty($_REQUEST['extra']) || ! empty( $_COOKIE['extra'] ) ){
+					$extra = "<br /><div class=\"data\" style=\"\">$dat</div>";
+				}
+				$li_style = 'background: url(' . $av . ') no-repeat; background-size: 24px; padding: 0px 0px 5px 30px;';
+				echo "<li style=\"$li_style\">$username$extra</li>".PHP_EOL;
+			}
+			?>
+		</ul>
 	</div>
 </div>
 

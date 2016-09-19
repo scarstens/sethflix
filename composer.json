@@ -1,0 +1,5 @@
+{
+  "require": {
+    "ptcong/easyrequest": "^1.0"
+  }
+}

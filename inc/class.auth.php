@@ -44,7 +44,7 @@ class Simple_Cookie_Auth{
 		return true;
 	}
 
-	public function user_logged_in(){
+	public static function user_logged_in(){
 		return defined('USER_LOGGED_IN');
 	}
 }

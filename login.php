@@ -4,7 +4,7 @@
 define('BYPASS_AUTH', true);
 
 //initialize application
-include_once('inc/app.init.php');
+include_once('server_config.php');
 
 $auth_cookie_name = 'x-passkey';
 if( ! empty( $_REQUEST['noredirect'] ) ){
