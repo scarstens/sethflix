@@ -49,6 +49,21 @@ include_once( 'server_config.php' );
 			</button>
 		</a>
 	</div>
+	<?php
+		$status = Plex_API_SDK_Redux::get_server_status();
+		if( empty($status) ){
+			$status_style = 'danger';
+			$status_comment = 'OFFLINE';
+		} else {
+			$status_style = 'info';
+			$status_comment = 'OK';
+		}
+	?>
+	<div class="bs-callout bs-callout-<?php echo $status_style; ?>" id="callout-alerts-no-default">
+		<h4>Sethflix Status: <?php echo $status_comment; ?></h4>
+		<p>If this is red, something is wrong with Sethflix servers. Usually this is temporary and the servers will be
+			restarted shortly. If this occurs for 24 hours, please contact your Sethflix advisor for more
+			information.</p></div>
 	<div class="recently-added-movies">
 		<?php Plex_API_SDK_Redux::print_recently_added_movies(); ?>
 	</div>

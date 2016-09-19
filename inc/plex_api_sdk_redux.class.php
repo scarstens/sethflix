@@ -25,6 +25,9 @@ class Plex_API_SDK_Redux {
 			)
 		);
 		$response     = $request->send();
+		if( empty($response) ){
+			return false;
+		}
 		$xml_response = $response->getBody()->getContents();
 
 		$data = self::plex_users_parser( $xml_response );
@@ -107,6 +110,9 @@ class Plex_API_SDK_Redux {
 			)
 		);
 		$response     = $request->send();
+		if( empty($response) ){
+			return false;
+		}
 		$xml_response = $response->getBody()->getContents();
 		$data         = self::plex_sections_parser( $xml_response );
 
@@ -128,5 +134,29 @@ class Plex_API_SDK_Redux {
 			if($i>3){break;}
 		}
 		echo '</div></div>';
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public static function get_server_status(){
+		$request      = \EasyRequest\Client::request(
+			self::$plex_private . '/',
+			'GET',
+			array(
+				'header' => array(
+					'User-Agent'   => 'Plex_API_SDK_Redux(LinuxClient)',
+					'X-Plex-Token' => self::$plex_server_token
+				),
+			)
+		);
+		$response     = $request->send();
+		if( empty($response) ){
+			return false;
+		}
+		$xml_response = $response->getBody()->getContents();
+		$data         = self::plex_sections_parser( $xml_response );
+		//echo '<pre style="overflow: scroll; height: 500px;">' . print_r( $data, true ) . '</pre>';
+		return true;
 	}
 }
