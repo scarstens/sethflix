@@ -1,6 +1,8 @@
 <?php
 //initialize application
-include_once( 'server_config.php' );
+@include_once( 'server_config.php' );
+@include_once( get_stylesheet_directory() . '/inc/app.init.php' );
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -15,7 +17,8 @@ include_once( 'server_config.php' );
 			<div class="row">
 				<div class="col-md-2">
 					<div class="imgAbt">
-						<img src="images/sethflix-icon.png" style="width: 100%; height: auto;"/>
+						<img src="<?php echo APP_SERVER_URI ?>images/sethflix-icon.png"
+							 style="width: 100%; height: auto;"/>
 					</div>
 				</div>
 				<div class="col-md-10">
@@ -24,25 +27,25 @@ include_once( 'server_config.php' );
 			</div>
 		</div>
 		<p>Welcome to the new age of streaming media.</p>
-		<a href="http://plex.tv">
+		<a href="https://plex.tv">
 			<button type="button" class="btn btn-default btn-upsize" aria-label="Left Align">
 				<span class="glyphicon glyphicon-facetime-video" aria-hidden="true"></span>
 				Plex Media Player
 			</button>
 		</a>
-		<a href="http://server.sethflix.com:3000/">
+		<a href="https://server.sethflix.com:3579/">
 			<button type="button" class="btn btn-default btn-upsize" aria-label="Left Align">
 				<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
 				Plex Requests
 			</button>
 		</a>
-		<a href="http://status.sethflix.com/">
+		<a href="https://status.sethflix.com/">
 			<button type="button" class="btn btn-default btn-upsize" aria-label="Left Align">
 				<span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
 				Sethflix Status
 			</button>
 		</a>
-		<a href="http://sethflix.com/friends.php">
+		<a href="<?php '/friends' . ROUTE_SUFFIX; ?>">
 			<button type="button" class="btn btn-default btn-upsize" aria-label="Left Align">
 				<span class="glyphicon glyphicon-user" aria-hidden="true"></span>
 				Sethflix Friends
@@ -50,14 +53,14 @@ include_once( 'server_config.php' );
 		</a>
 	</div>
 	<?php
-		$status = Plex_API_SDK_Redux::get_server_status();
-		if( empty($status) ){
-			$status_style = 'danger';
-			$status_comment = 'OFFLINE';
-		} else {
-			$status_style = 'info';
-			$status_comment = 'OK';
-		}
+	$status = Plex_API_SDK_Redux::get_server_status();
+	if ( empty( $status ) ) {
+		$status_style   = 'danger';
+		$status_comment = 'OFFLINE';
+	} else {
+		$status_style   = 'success';
+		$status_comment = 'OK';
+	}
 	?>
 	<div class="bs-callout bs-callout-<?php echo $status_style; ?>" id="callout-alerts-no-default">
 		<h4>Sethflix Status: <?php echo $status_comment; ?></h4>

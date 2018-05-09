@@ -1,6 +1,7 @@
 <?php
 //initialize application
-include_once('server_config.php');
+@include_once('server_config.php');
+@include_once( get_stylesheet_directory() . '/inc/app.init.php' );
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -15,7 +16,7 @@ include_once('server_config.php');
 		 <div class="row">
         <div class="col-md-2">
             <div class="imgAbt">
-                <img src="images/sethflix-icon.png" style="width: 100%; height: auto;" />
+                <img src="<?php echo APP_SERVER_URI ?>images/sethflix-icon.png" style="width: 100%; height: auto;" />
             </div>
         </div>
         <div class="col-md-10">
