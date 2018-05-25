@@ -12,7 +12,7 @@
 
 	<!-- Optional theme -->
 	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
-	<link rel="stylesheet" href="//getbootstrap.com/assets/css/docs.min.css">
+	<link rel="stylesheet" href="//bootstrapdocs.com/v3.3.6/docs/assets/css/docs.min.css">
 
 	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
