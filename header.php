@@ -5,7 +5,7 @@
  * @package sethflix
  */
 
-$favicon = APP_SERVER_URI . 'images/sethflix.favicon.ico';
+$favicon = APP_SERVER_URI . 'assets/images/sethflix.favicon.ico';
 ?>
 	<!DOCTYPE html>
 	<html lang="en">
