@@ -63,11 +63,92 @@ if ( function_exists( 'get_header' ) ) {
 				be
 				restarted shortly. If this occurs for 24 hours, please contact your Sethflix advisor for more
 				information.</p></div>
-		<div class="recently-added-movies">
-			<?php Plex_API_SDK_Redux::print_recently_added_movies(); ?>
+		<div class="row ecently-added-movies" style="margin-bottom: 20px">
+			<div class="col-md-12 col-md-offset-0">
+				<div class="carousel slide" id="myCarousel">
+					<div class="carousel-inner">
+						<?php Plex_API_SDK_Redux::print_recently_added_movies(); ?>
+					</div>
+					<a class="left carousel-control" href="#myCarousel" data-slide="prev"><i
+								class="glyphicon glyphicon-chevron-left"></i></a>
+					<a class="right carousel-control" href="#myCarousel" data-slide="next"><i
+								class="glyphicon glyphicon-chevron-right"></i></a>
+				</div>
+			</div>
 		</div>
 	</div>
 <?php
+add_action( 'sethflix_footer_scripts', function () {
+	?>
+	<script type="application/javascript">
+			jQuery.noConflict();
+
+			jQuery( document ).ready( function ( $ ) {
+				$( '#myCarousel' ).carousel( {
+					interval: false
+				} );
+				window.carousel_data = [];
+				window.carousel_count = 0;
+				$( '.carousel .item' ).each( function () {
+					carousel_data[ carousel_data.length ] = $( this ).children( ':first-child' );
+				} );
+
+				$( '.carousel .item' ).each( function ( count ) {
+					window.carousel_data_cursor = $( this );
+					var total = carousel_data.length;
+					var how_many_up = 4;
+					var last_array_int = window.carousel_data.length - 1;
+
+					// Dynamically build slide sets based on the how_many_up count.
+					var slides = [];
+					// Skip the first slide since its already in the grouping.
+					for ( fcount = 1; fcount < how_many_up; fcount++ ) {
+						slides[ fcount - 1 ] = count + fcount; // 4
+						// If the slides count is greater then the total, use the remainder.
+						// This is what loops back to beginning slides.
+						if ( slides[ fcount - 1 ] >= total ) {
+							slides[ fcount - 1 ] = slides[ fcount - 1 ] % total;
+						}
+					}
+					// SLIDE 0 already exists in each group, only append extra thumbs.
+					slides.forEach( function ( slide_num ) {
+						// window.carousel_data[ slides[ slide_num ] ].clone().appendTo( $( this ) );
+						window.carousel_data[ slide_num ].clone().appendTo( window.carousel_data_cursor );
+					} );
+
+				} );
+			} );
+
+	</script>
+	<style>
+		/* override position and transform in 3.3.x */
+		.carousel-inner .item.left.active {
+			transform: translateX(-25%);
+		}
+
+		.carousel-inner .item.right.active {
+			transform: translateX(25%);
+		}
+
+		.carousel-inner .item.next {
+			transform: translateX(25%)
+		}
+
+		.carousel-inner .item.prev {
+			transform: translateX(-25%)
+		}
+
+		.carousel-inner .item.right,
+		.carousel-inner .item.left {
+			transform: translateX(0);
+		}
+
+		.carousel-control.left, .carousel-control.right {
+			background-image: none;
+		}
+	</style>
+	<?php
+} );
 
 if ( function_exists( 'get_footer' ) ) {
 	get_footer();
