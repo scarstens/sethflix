@@ -48,7 +48,7 @@ if ( function_exists( 'get_header' ) ) {
 			</a>
 		</div>
 		<?php
-		$status = Plex_API_SDK_Redux::get_server_status();
+		$status = \Sethflix\Theme\Plex_API_SDK_Redux::get_server_status();
 		if ( empty( $status ) ) {
 			$status_style   = 'danger';
 			$status_comment = 'OFFLINE';
@@ -67,7 +67,7 @@ if ( function_exists( 'get_header' ) ) {
 			<div class="col-md-12 col-md-offset-0">
 				<div class="carousel slide" id="myCarousel">
 					<div class="carousel-inner">
-						<?php Plex_API_SDK_Redux::print_recently_added_movies(); ?>
+						<?php \Sethflix\Theme\Plex_API_SDK_Redux::print_recently_added_movies(); ?>
 					</div>
 					<a class="left carousel-control" href="#myCarousel" data-slide="prev"><i
 								class="glyphicon glyphicon-chevron-left"></i></a>
