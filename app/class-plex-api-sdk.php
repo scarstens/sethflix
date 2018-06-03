@@ -5,6 +5,8 @@
  * @package sethflix
  */
 
+namespace Sethflix\Theme;
+
 /**
  * Class Plex_API_SDK_Redux
  * https://github.com/mjs7231/python-plexapi/wiki/Unofficial-Plex-API-Documentation
@@ -36,7 +38,7 @@ class Plex_API_SDK_Redux {
 	/**
 	 * Get friends list from the Plex API
 	 *
-	 * @return array
+	 * @return array|bool
 	 */
 	static function get_friends() {
 
@@ -66,7 +68,7 @@ class Plex_API_SDK_Redux {
 	/**
 	 * Get account admin based on server token.
 	 *
-	 * @return array
+	 * @return array|bool
 	 */
 	static function get_account_admin() {
 
@@ -101,7 +103,7 @@ class Plex_API_SDK_Redux {
 	 */
 	static function plex_account_parser( $xml_string ) {
 		$new_data = [];
-		$data     = new SimpleXMLElement( $xml_string );
+		$data     = new \SimpleXMLElement( $xml_string );
 		$username = (string) $data->attributes()->username;
 		if ( stristr( $username, '@' ) ) {
 			$username = substr( $username, 0, strpos( $username, '@' ) );
@@ -127,7 +129,7 @@ class Plex_API_SDK_Redux {
 	 */
 	static function plex_users_parser( $xml_string ) {
 		$new_data = [];
-		$data     = new SimpleXMLElement( $xml_string );
+		$data     = new \SimpleXMLElement( $xml_string );
 
 		foreach ( $data->children() as $user ) {
 			$username = (string) $user->attributes()->username;
@@ -154,7 +156,7 @@ class Plex_API_SDK_Redux {
 	 */
 	static function plex_sections_parser( $xml_string, $each = 'Video', $name_att = 'title' ) {
 		$new_data = [];
-		$data     = new SimpleXMLElement( $xml_string );
+		$data     = new \SimpleXMLElement( $xml_string );
 		$i        = 0;
 		foreach ( $data->children() as $child ) {
 			$i ++;
@@ -177,7 +179,7 @@ class Plex_API_SDK_Redux {
 	/**
 	 * Helper function to get auth code.
 	 *
-	 * my.plexapp.com/users/sign_in.xml
+	 * @see my.plexapp.com/users/sign_in.xml
 	 */
 	static function get_auth_code() {
 
@@ -228,17 +230,18 @@ class Plex_API_SDK_Redux {
 	 */
 	public static function print_recently_added_movies( $section = '1' ) {
 		$movies = self::get_recently_added_movies( $section );
-		echo '<div class="recently-added"><style>.recently-added{padding-top:10px;}.recently-added:before { position: relative; top: -10px; left: 0px; font-size: 12px; font-weight: 700; color: #959595; text-transform: uppercase; letter-spacing: 1px; content: "Recently Added";}</style><div class="row">';
-		$i = 0;
+		$i      = 0;
+		$active = ' active';
 		foreach ( $movies as $label => $movie ) {
 			$i ++;
+
 			$thumb = self::$plex_private . $movie['thumb'] . '?X-Plex-Token=' . self::$plex_server_token;
-			echo '<div class="col-xs-6 col-md-3"><a href="#" class="thumbnail"><img src="' . $thumb . '" alt="..."></a></div>';
-			if ( $i > 3 ) {
+			echo '<div id="item_' . $i . '" class="item' . $active . '"><div id="thumb_' . $i . '" class="col-xs-6 col-md-3"><a href="#" class="thumbnail"><img src="' . $thumb . '" alt="..." class="img-responsive"></a></div></div>';
+			$active = '';
+			if ( $i > 6 ) {
 				break;
 			}
 		}
-		echo '</div></div>';
 	}
 
 	/**
