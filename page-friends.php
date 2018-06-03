@@ -31,7 +31,7 @@ if ( function_exists( 'get_header' ) ) {
 		</div>
 		<ul style="font-size: 1.4em; line-height: 24px; list-style: none;">
 			<?php
-			$friends = Plex_API_SDK_Redux::get_friends();
+			$friends = \Sethflix\Theme\Plex_API_SDK_Redux::get_friends();
 
 			foreach ( $friends as $username => $data ) {
 				$av    = $data['thumb'];
