@@ -19,7 +19,11 @@ class Plex_API_SDK_Redux {
 	 *
 	 * @var string
 	 */
-	public static $plex_private = 'http://server.sethflix.com:32400';
+	public static $plex_private = [
+		0 => 'http://server.sethflix.com:32400',
+		1 => 'https://192-168-1-135.42220d51d23947baa44cf9e323c90563.plex.direct:32400',
+		2 => 'https://192.168.1.10:32400',
+	];
 
 	/**
 	 * URL to node app that loads Plex client, plex.tv is always viable.
@@ -29,18 +33,13 @@ class Plex_API_SDK_Redux {
 	public static $plex_public = 'https://plex.tv';
 
 	/**
-	 * Plex server token is required to ping the plex API and retrieve data.
-	 *
-	 * @var string
-	 */
-	private static $plex_server_token = PLEX_SERVER_TOKEN;
-
-	/**
 	 * Get friends list from the Plex API
+	 *
+	 * @param int $server
 	 *
 	 * @return array|bool
 	 */
-	static function get_friends() {
+	static function get_friends( $server = 0 ) {
 
 		$request  = \EasyRequest\Client::request(
 			self::$plex_public . '/api/users',
@@ -48,7 +47,7 @@ class Plex_API_SDK_Redux {
 			[
 				'header' => [
 					'User-Agent'   => 'EasyRequest',
-					'X-Plex-Token' => self::$plex_server_token,
+					'X-Plex-Token' => apply_filters( 'PLEX_SERVER_TOKEN', '' )[ $server ],
 				],
 			]
 		);
@@ -68,9 +67,11 @@ class Plex_API_SDK_Redux {
 	/**
 	 * Get account admin based on server token.
 	 *
+	 * @param int $server
+	 *
 	 * @return array|bool
 	 */
-	static function get_account_admin() {
+	static function get_account_admin( $server = 0 ) {
 
 		$request  = \EasyRequest\Client::request(
 			self::$plex_public . '/users/account',
@@ -78,7 +79,7 @@ class Plex_API_SDK_Redux {
 			[
 				'header' => [
 					'User-Agent'   => 'EasyRequest',
-					'X-Plex-Token' => self::$plex_server_token,
+					'X-Plex-Token' => apply_filters( 'PLEX_SERVER_TOKEN', '' )[ $server ],
 				],
 			]
 		);
@@ -156,8 +157,22 @@ class Plex_API_SDK_Redux {
 	 */
 	static function plex_sections_parser( $xml_string, $each = 'Video', $name_att = 'title' ) {
 		$new_data = [];
-		$data     = new \SimpleXMLElement( $xml_string );
-		$i        = 0;
+		if ( empty( $xml_string ) ) {
+			echo 'BAD XML RESPONSE. SEE RESPONSE BELOW:' . PHP_EOL;
+			echo __FUNCTION__ . PHP_EOL;
+			print_r( $xml_string );
+		}
+
+		try {
+			$data = new \SimpleXMLElement( $xml_string );
+		} catch ( Exception $e ) {
+			echo 'BAD XML RESPONSE. SEE RESPONSE BELOW:' . PHP_EOL;
+			echo __FUNCTION__ . PHP_EOL;
+			print_r( $xml_string );
+			exit;
+		}
+
+		$i = 0;
 		foreach ( $data->children() as $child ) {
 			$i ++;
 			$label = (string) $child->attributes()->$name_att;
@@ -200,14 +215,14 @@ class Plex_API_SDK_Redux {
 	 *
 	 * @return array|bool
 	 */
-	static function get_recently_added_movies( $section = '1' ) {
+	static function get_recently_added_movies( $section = '1', $server = 0 ) {
 		$request  = \EasyRequest\Client::request(
-			self::$plex_private . '/library/sections/' . $section . '/recentlyAdded',
+			self::$plex_private[ $server ] . '/library/sections/' . $section . '/recentlyAdded',
 			'GET',
 			[
 				'header' => [
 					'User-Agent'   => 'Plex_API_SDK_Redux(LinuxClient)',
-					'X-Plex-Token' => self::$plex_server_token,
+					'X-Plex-Token' => apply_filters( 'PLEX_SERVER_TOKEN', '' )[ $server ],
 				],
 			]
 		);
@@ -227,15 +242,16 @@ class Plex_API_SDK_Redux {
 	 * @param string $section Place in array where movies are stored in API response.
 	 *
 	 * TODO: fix security by forcing login and custom per login token.
+	 * @param int    $server
 	 */
-	public static function print_recently_added_movies( $section = '1' ) {
+	public static function print_recently_added_movies( $section = '1', $server = 0 ) {
 		$movies = self::get_recently_added_movies( $section );
 		$i      = 0;
 		$active = ' active';
 		foreach ( $movies as $label => $movie ) {
 			$i ++;
 
-			$thumb = self::$plex_private . $movie['thumb'] . '?X-Plex-Token=' . self::$plex_server_token;
+			$thumb = self::$plex_private[ $server ] . $movie['thumb'] . '?X-Plex-Token=' . apply_filters( 'PLEX_SERVER_TOKEN', '' )[ $server ];
 			echo '<div id="item_' . $i . '" class="item' . $active . '"><div id="thumb_' . $i . '" class="col-xs-6 col-md-3"><a href="#" class="thumbnail"><img src="' . $thumb . '" alt="..." class="img-responsive"></a></div></div>';
 			$active = '';
 			if ( $i > 6 ) {
@@ -247,16 +263,18 @@ class Plex_API_SDK_Redux {
 	/**
 	 * Get the servers status (online or not)
 	 *
+	 * @param int $server
+	 *
 	 * @return mixed
 	 */
-	public static function get_server_status() {
+	public static function get_server_status( $server = 0 ) {
 		$request  = \EasyRequest\Client::request(
-			self::$plex_private . '/',
+			self::$plex_private[ $server ] . '/',
 			'GET',
 			[
 				'header' => [
 					'User-Agent'   => 'Plex_API_SDK_Redux(LinuxClient)',
-					'X-Plex-Token' => self::$plex_server_token,
+					'X-Plex-Token' => apply_filters( 'PLEX_SERVER_TOKEN', '' )[ $server ],
 				],
 			]
 		);
@@ -268,5 +286,107 @@ class Plex_API_SDK_Redux {
 		$data         = self::plex_sections_parser( $xml_response );
 
 		return true;
+	}
+
+	/**
+	 * Get decades options of movies in plex
+	 *
+	 * @param string $section Section where movies are found in API response.
+	 *
+	 * @param int    $server
+	 *
+	 * @return array|bool
+	 */
+	static function get_decades( $section = '1', $server = 0 ) {
+		$request_url = self::$plex_private[ $server ] . '/library/sections/' . $section . '/decade';
+		self::print_x( 'Request URL: ' . $request_url . PHP_EOL );
+		$request  = \EasyRequest\Client::request(
+			$request_url,
+			'GET',
+			[
+				'header' => [
+					'User-Agent'   => 'Plex_API_SDK_Redux(LinuxClient)',
+					'X-Plex-Token' => apply_filters( 'PLEX_SERVER_TOKEN', '' )[ $server ],
+				],
+			]
+		);
+		$response = $request->send();
+		self::print_x( 'Response Data: ' . PHP_EOL );
+		self::print_x( $response );
+		self::print_x( PHP_EOL );
+		if ( empty( $response ) ) {
+			return false;
+		}
+		$xml_response = $response->getBody()->getContents();
+		$data         = self::plex_sections_parser( $xml_response );
+
+		return $data;
+	}
+
+	/**
+	 * Get decades options of movies in plex
+	 *
+	 * @param string $section Section where movies are found in API response.
+	 * @param string $decade  The year of the decade to get movies from
+	 * @param int    $server
+	 *
+	 * @return array|bool
+	 */
+	static function get_decades_assets( $section = '1', $decade = '2000', $server = 0 ) {
+		$request_url = self::$plex_private[ $server ] . '/library/sections/' . $section . '/decade/' . $decade . '?checkFiles=1&includeExtras=1&includeBandwidths=1';
+		self::print_x( 'Request URL: ' . $request_url . PHP_EOL );
+		$request  = \EasyRequest\Client::request(
+			$request_url,
+			'GET',
+			[
+				'header' => [
+					'User-Agent'   => 'Plex_API_SDK_Redux(LinuxClient)',
+					'X-Plex-Token' => apply_filters( 'PLEX_SERVER_TOKEN', '' )[ $server ],
+				],
+			]
+		);
+		$response = $request->send();
+		if ( empty( $response ) ) {
+			return false;
+		}
+		$xml_response = $response->getBody()->getContents();
+		$data         = self::plex_sections_parser( $xml_response );
+
+		return $data;
+	}
+
+	/**
+	 * Get decades options of movies in plex
+	 *
+	 * @param     $asset_id
+	 * @param int $server
+	 *
+	 * @return array|bool
+	 */
+	static function get_asset_metadata( $asset_id, $server = 0 ) {
+		$request  = \EasyRequest\Client::request(
+			self::$plex_private[ $server ] . '/library/metadata/' . $asset_id,
+			'GET',
+			[
+				'header' => [
+					'User-Agent'   => 'Plex_API_SDK_Redux(LinuxClient)',
+					'X-Plex-Token' => apply_filters( 'PLEX_SERVER_TOKEN', '' )[ $server ],
+				],
+			]
+		);
+		$response = $request->send();
+		if ( empty( $response ) ) {
+			return false;
+		}
+		$xml_response = $response->getBody()->getContents();
+		$data         = self::plex_sections_parser( $xml_response );
+
+		return $data;
+	}
+
+	public static function print_x( $data ) {
+		if ( ! empty( $_REQUEST['debug'] ) ) {
+			print_r( $data );
+		}
 	}
 }

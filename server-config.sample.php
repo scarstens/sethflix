@@ -5,15 +5,14 @@
  * @package sethflix
  */
 
-define( 'PLEX_SERVER_TOKEN', 'PLACEYOURTOKENHERE' );
-define( 'APP_SERVER_DIR', dirname( __FILE__ ) );
-define( 'ROUTE_SUFFIX', '.php' );
-
-/**
- * Example for WordPress theme.
- */
-
-define( 'PLEX_SERVER_TOKEN', 'XEHgCB2p2Fpaj9QaLdTg' );
+add_filter( 'PLEX_SERVER_TOKEN', function () {
+	return [
+		0 => 'x', // Server 0
+		1 => 'y', // Server 1
+		2 => 'z', // Server 2
+	];
+} );
 define( 'ROUTE_SUFFIX', '/' );
 define( 'APP_SERVER_DIR', get_stylesheet_directory() . '/' );
 define( 'APP_SERVER_URI', get_stylesheet_directory_uri() . '/' );
+define( 'CACHE_ON', true );

@@ -29,7 +29,7 @@ class App {
 	/**
 	 * App constructor.
 	 */
-	public function __construct() {
+	public static function register_authentication() {
 		if ( self::is_authenticated() ) {
 			self::maybe_logout();
 		} else {

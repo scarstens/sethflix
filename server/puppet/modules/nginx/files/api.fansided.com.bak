@@ -1,0 +1,123 @@
+# TODO: Refactor PHP-FPM into a general config file for reuse in each block.
+
+# Redirect https to http for dev environment.
+server {
+  listen 443 ssl;
+  server_name    api.fansided.dev;
+  ssl_certificate       /etc/nginx/ssl/nginx.crt;
+  ssl_certificate_key   /etc/nginx/ssl/nginx.key;
+  return         301 http://$server_name$request_uri;
+}
+
+server {
+  listen 80;
+
+  server_name           api.fansided.dev;
+  client_max_body_size 20m;
+
+  root /var/www/api.fansided.com/htdocs/v2/public;
+
+  index index.php index.html index.htm;
+
+  access_log            /var/log/nginx/api.fansided.dev.access.log;
+  error_log             /var/log/nginx/api.fansided.dev.error.log;
+
+  rewrite ^/V1/(.*) http://api.fansided.dev/v1/$1 permanent;
+  rewrite ^/V2/(.*) http://api.fansided.dev/v2/$1 permanent;
+
+  location ~ \.inc {
+    deny all;
+  }
+
+  # Rewrite images to s3 path /thumbnails/ needs to be present
+  location /assets/images {
+    rewrite ^/assets/images/(.*)$ https://s3.amazonaws.com/api.fansided.com-partner-images/$1 redirect;
+  }
+
+  location / {
+    try_files $uri $uri/ /index.php?$query_string;
+
+    location ~* \.php$ {
+        try_files $uri $uri/ /index.php /index.php$is_args$args$is_args$args;
+        index  index.html index.htm index.php;    fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $request_filename;
+        fastcgi_pass unix:/var/run/php5-fpm.sock;
+        fastcgi_split_path_info ^(.+\.php)(/.*)$;
+        include fastcgi_params;
+     }
+  }
+
+  location /v1/ {
+    root /var/www/api.fansided.com/htdocs/;
+    try_files $uri $uri/ /index.php?$query_string;
+
+    location ~* \.php$ {
+        try_files $uri $uri/ /index.php /index.php$is_args$args$is_args$args;
+        index  index.html index.htm index.php;    fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $request_filename;
+        fastcgi_pass unix:/var/run/php5-fpm.sock;
+        fastcgi_split_path_info ^(.+\.php)(/.*)$;
+        include fastcgi_params;
+    }
+  }
+
+
+  location /dev/ {
+    root /var/www/api.fansided.com/htdocs/;
+    try_files $uri $uri/ /index.php?$query_string;
+
+    location ~* \.php$ {
+        try_files $uri $uri/ /index.php /index.php$is_args$args$is_args$args;
+        index  index.html index.htm index.php;    fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $request_filename;
+        fastcgi_pass unix:/var/run/php5-fpm.sock;
+        fastcgi_split_path_info ^(.+\.php)(/.*)$;
+        include fastcgi_params;
+    }
+  }
+
+  location /payment {
+    root /var/www/api.fansided.com/htdocs/;
+    try_files $uri $uri/ /index.php?$query_string;
+
+    location ~* \.php$ {
+        try_files $uri $uri/ /index.php /index.php$is_args$args$is_args$args;
+        index  index.html index.htm index.php;    fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $request_filename;
+        fastcgi_pass unix:/var/run/php5-fpm.sock;
+        fastcgi_split_path_info ^(.+\.php)(/.*)$;
+        include fastcgi_params;
+    }
+  }
+
+  location /utilities {
+    root /var/www/api.fansided.com/htdocs/;
+    try_files $uri $uri/ /index.php?$query_string;
+
+    location ~* \.php$ {
+        try_files $uri $uri/ /index.php /index.php$is_args$args$is_args$args;
+        index  index.html index.htm index.php;    fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $request_filename;
+        fastcgi_pass unix:/var/run/php5-fpm.sock;
+        fastcgi_split_path_info ^(.+\.php)(/.*)$;
+        include fastcgi_params;
+    }
+  }
+
+  location /newsletter-app {
+    alias /var/www/api.fansided.com/htdocs/newsletter_app/public/;
+
+    try_files $uri $uri/ /index.php$is_args$args;
+
+    location ~* \.php$ {
+      fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass unix:/var/run/php5-fpm.sock;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME /var/www/api.fansided.com/htdocs/newsletter_app/public/index.php;
+    }
+  }
+
+  sendfile off;
+
+}
